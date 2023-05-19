@@ -1,0 +1,19 @@
+{{ name }} is a {{ age }} year old {{ race }} {{ gender }} who has a medical encounter.
+It is a {{ encounter_type }} for {{ reason }}.
+{% if medications|length > 0 %}
+The patient was prescribed {{ medications | join(', ')}}.
+{% endif %}
+{% if procedures|length > 0 %}
+The patient had {{ procedures | join(', ')}} procedure(s) performed.
+{% endif %}
+{% if immunizations|length > 0 %}
+The patient was given the following immunizations {{ immunizations | join(', ')}}.
+{% endif %}
+Write a medical note for this encounter.
+The note should include symptoms that may be caused by {{reason}}.
+{% if medications|length > 0 %}
+Include instructions for taking {{ medications | join(', ')}}.
+{% endif %}
+{% if procedure|length > 0 %}
+Include actions any actions the patient should take after {{ procedure | join(', ')}} is performed.
+{% endif %}

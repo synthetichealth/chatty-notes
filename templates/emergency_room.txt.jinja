@@ -1,0 +1,15 @@
+{{ name }} is a {{ age }} year old {{ race }} {{ gender }} who is brought to the emergency room for {{ reason }}.
+{% if medications|length > 0 %}
+The patient was prescribed {{ medications | join(', ')}}.
+{% endif %}
+{% if procedures|length > 0 %}
+The patient had {{ procedures | join(', ')}} procedure(s) performed.
+{% endif %}
+Write a medical note for this encounter.
+The note should describe severe symptoms of {{reason}} resulting in the emergency room visit.
+{% if medications|length > 0 %}
+Include instructions for taking {{ medications | join(', ')}}.
+{% endif %}
+{% if procedure|length > 0 %}
+Include actions any actions the patient should take after {{ procedure | join(', ')}} is performed.
+{% endif %}
