@@ -159,6 +159,7 @@ def main():
     encounter_for_problem_template = template_env.get_template('encounter_for_problem.txt.jinja')
     er_template = template_env.get_template('emergency_room.txt.jinja')
     death_cert_template = template_env.get_template('death_certification.txt.jinja')
+    oa_template = template_env.get_template('oa_encounter.txt.jinja')
     for dr in extract_resources_by_type(bundle, 'DocumentReference'):
         encounter = find_encounter(bundle, dr)
         context = build_template_context(patient, encounter, bundle)
@@ -170,7 +171,10 @@ def main():
           prompt = death_cert_template.render(context)
           system_role = "You are a medical examiner."
         elif 'reasonCode' in encounter:
-          prompt = encounter_for_problem_template.render(context)
+            if encounter['reasonCode'][0]['coding'][0]['code'] == '239873007':
+                prompt = oa_template.render(context)
+            else:
+                prompt = encounter_for_problem_template.render(context)
 
         if prompt is not None:
           ai_generated_note = generate_note(prompt, system_role)

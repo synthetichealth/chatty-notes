@@ -1,9 +1,6 @@
 # chatty-notes
 A tool for generating clinical notes using Synthea patient FHIR Bundles.
 
-**This is a work in progress** - Output is to the terminal for now. Eventual goal
-is to create a modified FHIR Bundle with the notes as DocumentReferences.
-
 This project contains the `chatty.py` script that will take a FHIR Bundle as
 input. It then scans the FHIR Bundle for encounters. Given information on the
 encounter, pulled from other resources in the bundle, it will create a prompt
@@ -26,6 +23,9 @@ Running the script requires setting up an account with OpenAI and getting an [AP
 export OPENAI_API_KEY=YOUR_KEY_HERE
 python chatty.py -b PATH_TO_FHIR_BUNDLE
 ```
+
+The new bundle will be written to an `output` directory. The bundle file will have the same base name as
+the input file. An `output` directory will be created if one doesn't already exist.
 
 ## License
 Copyright 2023 The MITRE Corporation
