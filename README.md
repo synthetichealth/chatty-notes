@@ -27,6 +27,16 @@ python chatty.py -b PATH_TO_FHIR_BUNDLE
 The new bundle will be written to an `output` directory. The bundle file will have the same base name as
 the input file. An `output` directory will be created if one doesn't already exist.
 
+## Running on a Synthea output folder
+
+This is how it can be done using [GNU Parallel](https://www.gnu.org/software/parallel/):
+
+```
+ls ../synthea/output/fhir/*.json | awk '!/Information/' | parallel python chatty.py -b {}
+```
+
+In this case, `awk` is used to remove the hospital and provider information files from the pipeline.
+
 ## License
 Copyright 2023 The MITRE Corporation
 
