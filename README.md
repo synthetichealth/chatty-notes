@@ -35,6 +35,8 @@ This is how it can be done using [GNU Parallel](https://www.gnu.org/software/par
 ls ../synthea/output/fhir/*.json | awk '!/Information/' | parallel python chatty.py -b {}
 ```
 
+This will process all bundle files in the directory in... parallel.
+
 In this case, `awk` is used to remove the hospital and provider information files from the pipeline.
 
 ## License
