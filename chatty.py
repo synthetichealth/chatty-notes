@@ -137,6 +137,12 @@ def generate_note(prompt, role):
         except openai.error.RateLimitError:
             # Sleep longer with each unsuccessful attempt to call the API
             sleep(5 * attempt)
+        except openai.error.ServiceUnavailableError:
+            # Sleep longer with each unsuccessful attempt to call the API
+            sleep(5 * attempt)
+        except openai.error.APIError:
+            # Sleep longer with each unsuccessful attempt to call the API
+            sleep(5 * attempt)
     raise RuntimeError('Unable to generate note after 4 tries.')
 
 def write_output(input_file_name, output_bundle):
