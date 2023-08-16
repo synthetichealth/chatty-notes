@@ -2,8 +2,10 @@ import os
 import openai
 import argparse
 import json
+import operator
+import functools
 from copy import deepcopy
-from time import sleep
+from time import sleep, perf_counter
 from base64 import b64encode
 from pathlib import Path
 from datetime import date
@@ -121,8 +123,9 @@ def create_template_environment():
     return Environment(loader=PackageLoader("chatty"),
                        autoescape=select_autoescape(), trim_blocks=True)
 
-def generate_note(prompt, role):
+def generate_note(prompt, role, perf_log):
     # Try to call ChatGPT 4 times for this note
+    start = perf_counter()
     for attempt in range(1, 5):
         try:
             response = openai.ChatCompletion.create(
@@ -133,6 +136,9 @@ def generate_note(prompt, role):
                 ]
             )
             ai_generated_note = response['choices'][0]['message']['content']
+            complete = perf_counter()
+            elapsed_time = complete - start
+            perf_log.append({"time": elapsed_time, "attempts": attempt, "success": True})
             return ai_generated_note
         except openai.error.RateLimitError:
             # Sleep longer with each unsuccessful attempt to call the API
@@ -143,6 +149,9 @@ def generate_note(prompt, role):
         except openai.error.APIError:
             # Sleep longer with each unsuccessful attempt to call the API
             sleep(5 * attempt)
+    complete = perf_counter()
+    elapsed_time = complete - start
+    perf_log.append({"time": elapsed_time, "attempts": attempt, "success": False})
     raise RuntimeError('Unable to generate note after 4 tries.')
 
 def write_output(input_file_name, output_bundle):
@@ -166,6 +175,7 @@ def main():
     er_template = template_env.get_template('emergency_room.txt.jinja')
     death_cert_template = template_env.get_template('death_certification.txt.jinja')
     oa_template = template_env.get_template('oa_encounter.txt.jinja')
+    perf_log = []
     for dr in extract_resources_by_type(bundle, 'DocumentReference'):
         encounter = find_encounter(bundle, dr)
         context = build_template_context(patient, encounter, bundle)
@@ -183,7 +193,7 @@ def main():
                 prompt = encounter_for_problem_template.render(context)
 
         if prompt is not None:
-          ai_generated_note = generate_note(prompt, system_role)
+          ai_generated_note = generate_note(prompt, system_role, perf_log)
           # Calling decode at the end here may seem odd, but what it does is
           # transform a python byte array into a string. The end result is
           # the ChatGPT output as a Base64 encoded string.
@@ -191,8 +201,15 @@ def main():
           reference_id = dr['id']
           output_dr = extract_document_reference(output_bundle, reference_id)
           output_dr['content'][0]['attachment']['data'] = encoded_note
-          sleep(15)
     write_output(args.bundle, output_bundle)
-
+    total_note_count = len(perf_log)
+    successful = len(list(filter(lambda row: row["success"] == True, perf_log)))
+    failed = len(list(filter(lambda row: row["success"] == False, perf_log)))
+    total_time = functools.reduce(operator.add, map(lambda row: row["time"], perf_log))
+    average_time = total_time / total_note_count
+    print(f'Total notes: {total_note_count}')
+    print(f'Success: {successful}')
+    print(f'Failed: {failed}')
+    print(f'Average time: {average_time}')
 if __name__ == "__main__":
     main()
