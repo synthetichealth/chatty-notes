@@ -6,8 +6,13 @@ input. It then scans the FHIR Bundle for encounters. Given information on the
 encounter, pulled from other resources in the bundle, it will create a prompt
 for ChatGPT. The script uses [OpenAI Chat completions API](https://platform.openai.com/docs/guides/chat) to supply the prompt and get a response.
 
+This project also contains the `chatty.rb` script that takes all FHIR Bundles
+within the `input` folder, replaces all the clinical notes with LLM notes, and
+writes the results in the `output` folder.
+
 ## Installation
 
+### Python
 ```
 git clone https://github.com/synthetichealth/chatty-notes.git
 cd chatty-notes/
@@ -16,6 +21,7 @@ pip install -r requirements.txt
 
 ## Running
 
+### Python
 Running the script requires setting up an account with OpenAI and getting an [API key](https://platform.openai.com/account/api-keys). The API key should be added to the environment in the
 `OPENAI_API_KEY` variable.
 
@@ -26,6 +32,14 @@ python chatty.py -b PATH_TO_FHIR_BUNDLE
 
 The new bundle will be written to an `output` directory. The bundle file will have the same base name as
 the input file. An `output` directory will be created if one doesn't already exist.
+
+### Ruby
+
+Copy all of your Synthea bundles to the `input` folder.
+```
+ruby chatty.rb
+```
+All the updated bundles are in the `output/fhir` folder.
 
 ## Running on a Synthea output folder
 
@@ -40,7 +54,7 @@ This will process all bundle files in the directory in... parallel.
 In this case, `awk` is used to remove the hospital and provider information files from the pipeline.
 
 ## License
-Copyright 2023 The MITRE Corporation
+Copyright 2023-2025 The MITRE Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
