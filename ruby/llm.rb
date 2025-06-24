@@ -7,7 +7,7 @@ module MITRE
     DEFAULT_MODEL = ''
     MODELS = {}
 
-    RETRY_LIMIT = 3
+    RETRY_LIMIT = 5
 
     REQUEST_TEMPLATE = {
       'model' => nil,
@@ -52,12 +52,13 @@ module MITRE
       attempt = 0
       begin
         @response = Net::HTTP.post(@current_uri, @request.to_json, 'Content-Type' => 'application/json')
-      rescue => e
+      rescue Exception, Net::ReadTimeout, Errno::ECONNREFUSED => e
         puts e.message
         attempt += 1
-        if (attempt >= RETRY_LIMIT)
-          sleep((3 * attempt).seconds)
-          puts '... retry ...'
+        if (attempt <= RETRY_LIMIT)
+          puts '... wait ...'
+          sleep((5 * attempt))
+          puts "... retry #{attempt} ..."
           retry
         else
           raise(e)
